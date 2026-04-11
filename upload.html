@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Upload Document</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f4f7fb;
+  text-align: center;
+}
+
+.header {
+  background: #0072ff;
+  color: white;
+  padding: 15px;
+  font-size: 22px;
+}
+
+.upload-box {
+  margin: 50px auto;
+  width: 300px;
+  padding: 30px;
+  border: 2px dashed #0072ff;
+  border-radius: 12px;
+  background: white;
+}
+
+input {
+  margin-top: 15px;
+}
+
+select {
+  margin-top: 15px;
+  padding: 8px;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px;
+  width: 100%;
+  background: #0072ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #005edb;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  Upload Document
+</div>
+
+<div class="upload-box">
+  <p>Drag & Drop or Select File</p>
+
+  <input type="file">
+
+  <br>
+
+  <select>
+    <option>Select Category</option>
+    <option>Bills</option>
+    <option>ID</option>
+    <option>Reports</option>
+  </select>
+
+  <button onclick="uploadDoc()">Upload</button>
+</div>
+
+<script>
+function uploadDoc() {
+  alert("Document Uploaded Successfully (Prototype)");
+  window.location.href = "dashboard.html";
+}
+</script>
+
+</body>
+</html>

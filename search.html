@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Search Documents</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f4f7fb;
+}
+
+.header {
+  background: #0072ff;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 22px;
+}
+
+.container {
+  padding: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.file {
+  background: white;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #0072ff;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #005edb;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  Search Documents
+</div>
+
+<div class="container">
+
+  <input type="text" placeholder="Search documents...">
+
+  <div class="file">
+    <span>Electricity Bill.pdf</span>
+    <button onclick="viewDoc()">View</button>
+  </div>
+
+  <div class="file">
+    <span>Aadhar Card.pdf</span>
+    <button onclick="viewDoc()">View</button>
+  </div>
+
+  <div class="file">
+    <span>Monthly Report.pdf</span>
+    <button onclick="viewDoc()">View</button>
+  </div>
+
+</div>
+
+<script>
+function viewDoc() {
+  alert("Opening Document (Prototype)");
+}
+</script>
+
+</body>
+</html>
