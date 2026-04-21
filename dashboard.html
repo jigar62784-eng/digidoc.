@@ -910,9 +910,9 @@ function renderDocs(list) {
 function filterDocs(q) {
   renderDocs(docs.filter(d=>d.name.toLowerCase().includes(q.toLowerCase())||d.type.toLowerCase().includes(q.toLowerCase())));
 }
-renderDocs(docs);
-  function goToPay() {
-  window.location.href = "pay.html";
+function goToPay() {
+  window.location.href = "/digidoc/pay.html";
+
 }
 </script>
 </body>
