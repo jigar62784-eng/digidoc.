@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DocuSmart Login</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 body {
   margin: 0;
@@ -15,6 +17,7 @@ body {
   justify-content: center;
   align-items: center;
 }
+
 .login-box {
   background: rgba(255, 255, 255, 0.12);
   padding: 35px 30px;
@@ -24,25 +27,30 @@ body {
   text-align: center;
   box-shadow: 0 8px 25px rgba(0,0,0,0.2);
 }
+
 .logo {
   font-size: 24px;
   font-weight: 600;
   color: white;
   margin-bottom: 5px;
 }
+
 .subtitle {
   font-size: 13px;
   color: #e0f7ff;
   margin-bottom: 20px;
 }
+
 .input-group {
   text-align: left;
   margin-bottom: 15px;
 }
+
 label {
   font-size: 12px;
   color: #dff6ff;
 }
+
 input {
   width: 100%;
   padding: 10px;
@@ -51,9 +59,11 @@ input {
   border-radius: 8px;
   outline: none;
 }
+
 input:focus {
   box-shadow: 0 0 5px #00c6ff;
 }
+
 button {
   width: 100%;
   padding: 12px;
@@ -66,63 +76,49 @@ button {
   cursor: pointer;
   transition: 0.3s;
 }
+
 button:hover {
   transform: scale(1.03);
   background: linear-gradient(to right, #031116, #01070f);
 }
-.btn-pay {
-  background: linear-gradient(to right, #00e676, #00bfff);
-  color: #000;
-  margin-top: 10px;
-}
-.btn-pay:hover {
-  background: linear-gradient(to right, #009e52, #0088cc);
-  color: white;
-}
+
 .footer {
   margin-top: 15px;
   font-size: 12px;
   color: #dff6ff;
 }
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 14px 0 4px;
-  color: #7ab8cc;
-  font-size: 11px;
-}
-.divider::before, .divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(255,255,255,0.15);
-}
 </style>
 </head>
+
 <body>
+
 <div class="login-box">
+
   <div class="logo">DocuSmart</div>
   <div class="subtitle">Smart Document Management System</div>
+
   <div class="input-group">
     <label>Email</label>
     <input type="text" placeholder="Enter your email">
   </div>
+
   <div class="input-group">
     <label>Password</label>
     <input type="password" placeholder="Enter your password">
   </div>
+
   <button onclick="login()">Login</button>
 
-  <div class="divider">quick access</div>
-  <button class="btn-pay" onclick="window.location.href='pay.html'">💳 &nbsp;PayFlow — Payments</button>
-
   <div class="footer">© 2026 DocuSmart</div>
+
 </div>
+
 <script>
 function login() {
+  
   window.location.href = "dashboard.html";
 }
 </script>
+
 </body>
 </html>
