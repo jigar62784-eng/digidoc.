@@ -336,6 +336,7 @@
     <button class="nav-btn" onclick="showSection('qr')">📱 QR Code</button>
     <button class="nav-btn" onclick="showSection('camera')">📷 Camera</button>
     <button class="nav-btn" onclick="showSection('search')">🔍 Documents</button>
+    <button class="nav-btn" onclick="goToPay()">💳 Pay</button>
   </div>
 </div>
 
@@ -910,6 +911,9 @@ function filterDocs(q) {
   renderDocs(docs.filter(d=>d.name.toLowerCase().includes(q.toLowerCase())||d.type.toLowerCase().includes(q.toLowerCase())));
 }
 renderDocs(docs);
+  function goToPay() {
+  window.location.href = "pay.html";
+}
 </script>
 </body>
 </html>
