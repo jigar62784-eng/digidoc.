@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PayFlow — Payments</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #080c12;
+      --surface:  #0f1520;
+      --card:     #141c2b;
+      --border:   #1e2d45;
+      --accent:   #00d4ff;
+      --accent2:  #7c3aed;
+      --green:    #00e676;
+      --red:      #ff4f6a;
+      --text:     #e8f0fe;
+      --muted:    #5a7099;
+      --font-h:   'Syne', sans-serif;
+      --font-b:   'DM Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BG GLOW ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(0,212,255,.08) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(124,58,237,.1) 0%, transparent 70%);
+    }
+
+    /* ── LAYOUT ── */
+    .shell {
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+    .logo {
+      font-family: var(--font-h);
+      font-size: 1.4rem; font-weight: 800;
+      letter-spacing: -.02em;
+    }
+    .logo span { color: var(--accent); }
+    .balance-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 8px 20px;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .balance-chip strong {
+      color: var(--green);
+      font-family: var(--font-h);
+      font-size: 1rem;
+    }
+
+    /* ── GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media(max-width:700px){ .grid{ grid-template-columns:1fr; } }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s;
+    }
+    .card:hover { border-color: rgba(0,212,255,.3); }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: 20px 20px 0 0;
+    }
+    .card.send::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .card.receive::before { background: linear-gradient(90deg, var(--green), #00bfff); }
+
+    .card-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 28px;
+    }
+    .card-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 1.2rem;
+    }
+    .send .card-icon  { background: rgba(0,212,255,.12); }
+    .receive .card-icon { background: rgba(0,230,118,.12); }
+
+    .card-title {
+      font-family: var(--font-h);
+      font-size: 1.1rem; font-weight: 700;
+    }
+    .card-sub { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── FORM ELEMENTS ── */
+    label {
+      display: block;
+      font-size: .72rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .field { margin-bottom: 18px; }
+
+    input, select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,212,255,.1);
+    }
+    input::placeholder { color: #2e4060; }
+    select option { background: var(--surface); }
+
+    .amount-wrap {
+      position: relative;
+    }
+    .amount-wrap .currency {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--accent);
+      font-family: var(--font-h);
+      font-weight: 700;
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .amount-wrap input { padding-left: 42px; font-size: 1.1rem; font-family: var(--font-h); font-weight: 700; }
+
+    /* QUICK AMOUNTS */
+    .quick-amounts {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .qa {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: .78rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .18s;
+      font-family: var(--font-b);
+    }
+    .qa:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* BUTTON */
+    .btn {
+      width: 100%; padding: 14px;
+      border: none; border-radius: 12px;
+      font-family: var(--font-h);
+      font-size: .95rem; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: transform .15s, opacity .15s;
+      margin-top: 6px;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); opacity: .85; }
+    .btn-send {
+      background: linear-gradient(135deg, var(--accent), #0088cc);
+      color: #000;
+    }
+    .btn-receive {
+      background: linear-gradient(135deg, var(--green), #00bfff);
+      color: #000;
+    }
+
+    /* ── DIVIDER ── */
+    .or-row {
+      display: flex; align-items: center; gap: 10px;
+      margin: 16px 0;
+      color: var(--muted); font-size: .75rem;
+    }
+    .or-row::before, .or-row::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── RECEIVE QR AREA ── */
+    .qr-section {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .qr-box {
+      width: 120px; height: 120px;
+      margin: 0 auto 12px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: white;
+      display: grid; place-items: center;
+    }
+    .qr-box svg { width: 100px; height: 100px; }
+    .qr-addr {
+      font-size: .72rem;
+      color: var(--muted);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+    .qr-addr strong { color: var(--accent); display: block; margin-bottom: 4px; }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 18px;
+      color: var(--muted);
+      font-size: .75rem;
+      cursor: pointer;
+      margin-top: 10px;
+      font-family: var(--font-b);
+      transition: all .18s;
+    }
+    .copy-btn:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── HISTORY CARD ── */
+    .history-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-top: 24px;
+    }
+    .history-card h2 {
+      font-family: var(--font-h); font-size: 1rem; font-weight: 700;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hist-list { display: flex; flex-direction: column; gap: 10px; }
+    .hist-item {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color .2s;
+    }
+    .hist-item:hover { border-color: var(--border); border-color: rgba(0,212,255,.2); }
+    .hist-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-weight: 700; font-size: .85rem;
+      font-family: var(--font-h); flex-shrink: 0;
+    }
+    .hist-info { flex: 1; }
+    .hist-name { font-size: .88rem; font-weight: 500; }
+    .hist-note { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+    .hist-right { text-align: right; }
+    .hist-amt {
+      font-family: var(--font-h); font-size: .95rem; font-weight: 700;
+    }
+    .hist-amt.out { color: var(--red); }
+    .hist-amt.in  { color: var(--green); }
+    .hist-time { font-size: .7rem; color: var(--muted); margin-top: 2px; }
+
+    /* BADGE */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 10px;
+      border-radius: 100px;
+      font-size: .65rem;
+      font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
+    }
+    .badge.sent     { background: rgba(255,79,106,.12); color: var(--red); }
+    .badge.received { background: rgba(0,230,118,.12); color: var(--green); }
+    .badge.pending  { background: rgba(0,212,255,.10); color: var(--accent); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-size: .85rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      z-index: 999;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #toast .ti { margin-right: 8px; }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media(max-width:600px){ .stats-row{ grid-template-columns:1fr 1fr; } }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+    }
+    .stat-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+    .stat-val {
+      font-family: var(--font-h); font-size: 1.3rem; font-weight: 800;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">Pay<span>Flow</span></div>
+    <div class="balance-chip">Wallet Balance &nbsp;<strong>₹ 24,500.00</strong></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Sent Today</div>
+      <div class="stat-val" style="color:var(--red)">₹ 3,200</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Received</div>
+      <div class="stat-val" style="color:var(--green)">₹ 7,850</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending</div>
+      <div class="stat-val" style="color:var(--accent)">2 Txns</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="grid">
+
+    <!-- SEND MONEY -->
+    <div class="card send">
+      <div class="card-head">
+        <div class="card-icon">➤</div>
+        <div>
+          <div class="card-title">Send Money</div>
+          <div class="card-sub">Transfer instantly to anyone</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Recipient</label>
+        <input id="recipient" type="text" placeholder="Name, UPI ID or phone" />
+      </div>
+
+      <div class="field">
+        <label>Amount (₹)</label>
+        <div class="amount-wrap">
+          <span class="currency">₹</span>
+          <input id="sendAmt" type="number" placeholder="0.00" min="1" />
+        </div>
+      </div>
+
+      <div class="quick-amounts">
+        <span class="qa" onclick="setAmt('sendAmt',100)">₹100</span>
+        <span class="qa" onclick="setAmt('sendAmt',500)">₹500</span>
+        <span class="qa" onclick="setAmt('sendAmt',1000)">₹1000</span>
+        <span class="qa" onclick="setAmt('sendAmt',5000)">₹5000</span>
+      </div>
+
+      <div class="field">
+        <label>Payment Method</label>
+        <select id="payMethod">
+          <option>UPI</option>
+          <option>Bank Transfer (NEFT/IMPS)</option>
+          <option>Wallet Balance</option>
+          <option>Debit/Credit Card</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Note (optional)</label>
+        <input id="sendNote" type="text" placeholder="e.g. Rent, Dinner split…" />
+      </div>
+
+      <button class="btn btn-send" onclick="handleSend()">
+        ➤ &nbsp;Send Payment
+      </button>
+    </div>
+
+    <!-- RECEIVE MONEY -->
+    <div class="card receive">
+      <div class="card-head">
+        <div class="card-icon">⬇</div>
+        <div>
+          <div class="card-title">Receive Money</div>
+          <div class="card-sub">Share your details or QR code</div>
+        </div>
+      </div>
+
+      <!-- QR -->
+      <div class="qr-section">
+        <div class="qr-box">
+          <!-- Simple SVG QR placeholder pattern -->
+          <svg viewBox="0 0 37 37" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+            <rect width="37" height="37" fill="white"/>
+            <!-- TL finder -->
+            <rect x="1" y="1" width="7" height="7" fill="#000"/>
+            <rect x="2" y="2" width="5" height="5" fill="white"/>
+            <rect x="3" y="3" width="3" height="3" fill="#000"/>
+            <!-- TR finder -->
+            <rect x="29" y="1" width="7" height="7" fill="#000"/>
+            <rect x="30" y="2" width="5" height="5" fill="white"/>
+            <rect x="31" y="3" width="3" height="3" fill="#000"/>
+            <!-- BL finder -->
+            <rect x="1" y="29" width="7" height="7" fill="#000"/>
+            <rect x="2" y="30" width="5" height="5" fill="white"/>
+            <rect x="3" y="31" width="3" height="3" fill="#000"/>
+            <!-- Data dots -->
+            <rect x="10" y="1" width="1" height="1" fill="#000"/>
+            <rect x="12" y="1" width="1" height="1" fill="#000"/>
+            <rect x="14" y="1" width="2" height="1" fill="#000"/>
+            <rect x="10" y="3" width="2" height="1" fill="#000"/>
+            <rect x="14" y="3" width="1" height="1" fill="#000"/>
+            <rect x="17" y="2" width="1" height="2" fill="#000"/>
+            <rect x="19" y="1" width="2" height="1" fill="#000"/>
+            <rect x="22" y="1" width="2" height="1" fill="#000"/>
+            <rect x="25" y="2" width="1" height="1" fill="#000"/>
+            <rect x="10" y="5" width="1" height="2" fill="#000"/>
+            <rect x="13" y="6" width="3" height="1" fill="#000"/>
+            <rect x="18" y="5" width="2" height="2" fill="#000"/>
+            <rect x="22" y="4" width="1" height="3" fill="#000"/>
+            <rect x="24" y="5" width="3" height="1" fill="#000"/>
+            <rect x="1" y="10" width="1" height="2" fill="#000"/>
+            <rect x="3" y="10" width="3" height="1" fill="#000"/>
+            <rect x="7" y="9" width="1" height="3" fill="#000"/>
+            <rect x="9" y="10" width="4" height="1" fill="#000"/>
+            <rect x="15" y="9" width="2" height="2" fill="#000"/>
+            <rect x="19" y="10" width="1" height="1" fill="#000"/>
+            <rect x="21" y="9" width="3" height="1" fill="#000"/>
+            <rect x="26" y="10" width="2" height="2" fill="#000"/>
+            <rect x="29" y="9" width="1" height="2" fill="#000"/>
+            <rect x="31" y="10" width="2" height="1" fill="#000"/>
+            <rect x="35" y="9" width="1" height="3" fill="#000"/>
+            <rect x="2" y="13" width="4" height="1" fill="#000"/>
+            <rect x="8" y="13" width="2" height="2" fill="#000"/>
+            <rect x="12" y="12" width="1" height="3" fill="#000"/>
+            <rect x="14" y="13" width="3" height="1" fill="#000"/>
+            <rect x="18" y="12" width="2" height="2" fill="#000"/>
+            <rect x="22" y="13" width="4" height="1" fill="#000"/>
+            <rect x="28" y="12" width="2" height="2" fill="#000"/>
+            <rect x="32" y="13" width="3" height="1" fill="#000"/>
+            <rect x="1" y="16" width="5" height="1" fill="#000"/>
+            <rect x="8" y="16" width="1" height="2" fill="#000"/>
+            <rect x="11" y="15" width="3" height="2" fill="#000"/>
+            <rect x="16" y="16" width="2" height="1" fill="#000"/>
+            <rect x="20" y="15" width="1" height="3" fill="#000"/>
+            <rect x="23" y="16" width="3" height="1" fill="#000"/>
+            <rect x="27" y="15" width="2" height="2" fill="#000"/>
+            <rect x="31" y="16" width="4" height="1" fill="#000"/>
+            <rect x="3" y="19" width="2" height="2" fill="#000"/>
+            <rect x="7" y="18" width="3" height="2" fill="#000"/>
+            <rect x="12" y="19" width="2" height="1" fill="#000"/>
+            <rect x="16" y="18" width="1" height="3" fill="#000"/>
+            <rect x="19" y="19" width="3" height="1" fill="#000"/>
+            <rect x="24" y="18" width="2" height="2" fill="#000"/>
+            <rect x="28" y="19" width="4" height="1" fill="#000"/>
+            <rect x="34" y="18" width="2" height="2" fill="#000"/>
+            <rect x="1" y="22" width="6" height="1" fill="#000"/>
+            <rect x="9" y="21" width="2" height="3" fill="#000"/>
+            <rect x="13" y="22" width="4" height="1" fill="#000"/>
+            <rect x="19" y="21" width="2" height="2" fill="#000"/>
+            <rect x="23" y="22" width="3" height="1" fill="#000"/>
+            <rect x="27" y="21" width="1" height="3" fill="#000"/>
+            <rect x="30" y="22" width="2" height="1" fill="#000"/>
+            <rect x="33" y="21" width="3" height="2" fill="#000"/>
+            <rect x="10" y="25" width="3" height="2" fill="#000"/>
+            <rect x="15" y="26" width="2" height="1" fill="#000"/>
+            <rect x="19" y="25" width="4" height="2" fill="#000"/>
+            <rect x="25" y="26" width="3" height="1" fill="#000"/>
+            <rect x="29" y="25" width="2" height="2" fill="#000"/>
+            <rect x="33" y="25" width="3" height="2" fill="#000"/>
+          </svg>
+        </div>
+        <div class="qr-addr">
+          <strong>Your UPI ID</strong>
+          rehan@payflow &nbsp;|&nbsp; +91 98765 43210
+        </div>
+        <button class="copy-btn" onclick="copyUPI()">⎘ Copy UPI ID</button>
+      </div>
+
+      <div class="or-row">or request a specific amount</div>
+
+      <div class="field">
+        <label>Request Amount (₹)</label>
+        <div class="amount-wrap">
+          <span class="currency">₹</span>
+          <input id="reqAmt" type="number" placeholder="0.00" min="1" />
+        </div>
+      </div>
+
+      <div class="quick-amounts">
+        <span class="qa" onclick="setAmt('reqAmt',200)">₹200</span>
+        <span class="qa" onclick="setAmt('reqAmt',500)">₹500</span>
+        <span class="qa" onclick="setAmt('reqAmt',2000)">₹2000</span>
+        <span class="qa" onclick="setAmt('reqAmt',10000)">₹10K</span>
+      </div>
+
+      <div class="field">
+        <label>From (phone / UPI)</label>
+        <input id="reqFrom" type="text" placeholder="Who should pay you?" />
+      </div>
+
+      <button class="btn btn-receive" onclick="handleRequest()">
+        ⬇ &nbsp;Request Payment
+      </button>
+    </div>
+  </div>
+
+  <!-- TRANSACTION HISTORY -->
+  <div class="history-card">
+    <h2>🕐 Recent Transactions</h2>
+    <div class="hist-list" id="histList">
+
+      <div class="hist-item">
+        <div class="hist-avatar" style="background:rgba(255,79,106,.15);color:var(--red)">AK</div>
+        <div class="hist-info">
+          <div class="hist-name">Aryan Kumar <span class="badge sent">Sent</span></div>
+          <div class="hist-note">UPI · Rent for May</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-amt out">− ₹12,000</div>
+          <div class="hist-time">Today, 11:42 AM</div>
+        </div>
+      </div>
+
+      <div class="hist-item">
+        <div class="hist-avatar" style="background:rgba(0,230,118,.12);color:var(--green)">PR</div>
+        <div class="hist-info">
+          <div class="hist-name">Priya Raj <span class="badge received">Received</span></div>
+          <div class="hist-note">Bank Transfer · Freelance invoice</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-amt in">+ ₹7,850</div>
+          <div class="hist-time">Yesterday, 6:15 PM</div>
+        </div>
+      </div>
+
+      <div class="hist-item">
+        <div class="hist-avatar" style="background:rgba(0,212,255,.10);color:var(--accent)">MS</div>
+        <div class="hist-info">
+          <div class="hist-name">Mohit Sharma <span class="badge pending">Pending</span></div>
+          <div class="hist-note">UPI · Dinner split</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-amt out">− ₹450</div>
+          <div class="hist-time">Yesterday, 9:00 PM</div>
+        </div>
+      </div>
+
+      <div class="hist-item">
+        <div class="hist-avatar" style="background:rgba(0,230,118,.12);color:var(--green)">SB</div>
+        <div class="hist-info">
+          <div class="hist-name">Sneha Bose <span class="badge received">Received</span></div>
+          <div class="hist-note">Wallet · Movie tickets</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-amt in">+ ₹600</div>
+          <div class="hist-time">Mon, 3:30 PM</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<!-- TOAST -->
+<div id="toast"><span class="ti"></span><span id="toastMsg"></span></div>
+
+<script>
+  function setAmt(id, val) {
+    document.getElementById(id).value = val;
+  }
+
+  function showToast(icon, msg) {
+    const t = document.getElementById('toast');
+    document.querySelector('#toast .ti').textContent = icon + ' ';
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  function handleSend() {
+    const recipient = document.getElementById('recipient').value.trim();
+    const amt       = parseFloat(document.getElementById('sendAmt').value);
+    const method    = document.getElementById('payMethod').value;
+    const note      = document.getElementById('sendNote').value.trim();
+
+    if (!recipient) return showToast('⚠️', 'Please enter a recipient.');
+    if (!amt || amt <= 0) return showToast('⚠️', 'Enter a valid amount.');
+
+    // Simulate processing
+    showToast('⏳', 'Processing payment…');
+    setTimeout(() => {
+      const displayNote = note ? ` · ${note}` : '';
+      addHistory(recipient, 'out', amt, method + displayNote, 'Sent');
+      document.getElementById('recipient').value = '';
+      document.getElementById('sendAmt').value   = '';
+      document.getElementById('sendNote').value  = '';
+      showToast('✅', `₹${amt.toLocaleString('en-IN')} sent to ${recipient}!`);
+    }, 1600);
+  }
+
+  function handleRequest() {
+    const from = document.getElementById('reqFrom').value.trim();
+    const amt  = parseFloat(document.getElementById('reqAmt').value);
+
+    if (!from) return showToast('⚠️', 'Enter the payer's UPI ID or phone.');
+    if (!amt || amt <= 0) return showToast('⚠️', 'Enter a valid amount.');
+
+    showToast('⏳', 'Sending payment request…');
+    setTimeout(() => {
+      addHistory(from, 'in', amt, 'Payment request sent', 'Pending');
+      document.getElementById('reqFrom').value = '';
+      document.getElementById('reqAmt').value  = '';
+      showToast('📨', `Request of ₹${amt.toLocaleString('en-IN')} sent to ${from}`);
+    }, 1400);
+  }
+
+  function addHistory(name, dir, amt, note, status) {
+    const list = document.getElementById('histList');
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const colors = {
+      out: { bg: 'rgba(255,79,106,.15)', color: 'var(--red)' },
+      in:  { bg: 'rgba(0,230,118,.12)', color: 'var(--green)' }
+    };
+    const badgeClass = { Sent: 'sent', Received: 'received', Pending: 'pending' }[status];
+    const sign  = dir === 'out' ? '−' : '+';
+    const amtCl = dir === 'out' ? 'out' : 'in';
+    const c = colors[dir];
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+    const item = document.createElement('div');
+    item.className = 'hist-item';
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(12px)';
+    item.innerHTML = `
+      <div class="hist-avatar" style="background:${c.bg};color:${c.color}">${initials}</div>
+      <div class="hist-info">
+        <div class="hist-name">${name} <span class="badge ${badgeClass}">${status}</span></div>
+        <div class="hist-note">${note}</div>
+      </div>
+      <div class="hist-right">
+        <div class="hist-amt ${amtCl}">${sign} ₹${amt.toLocaleString('en-IN')}</div>
+        <div class="hist-time">Just now, ${timeStr}</div>
+      </div>`;
+
+    list.prepend(item);
+    requestAnimationFrame(() => {
+      item.style.transition = 'opacity .4s, transform .4s';
+      item.style.opacity = '1';
+      item.style.transform = 'none';
+    });
+  }
+
+  function copyUPI() {
+    navigator.clipboard.writeText('rehan@payflow').then(() => {
+      showToast('✅', 'UPI ID copied to clipboard!');
+    }).catch(() => {
+      showToast('📋', 'UPI: rehan@payflow');
+    });
+  }
+</script>
+</body>
+</html>
